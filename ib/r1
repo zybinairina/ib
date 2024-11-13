@@ -1,0 +1,135 @@
+Работа №1 Управление правами доступа к объектам ОС Linux
+Цель: Изучить команды ОС и принципы разграничения доступа к файловой системе 
+
+Просмотр информации о пользователях:
+nano /etc/passwd
+tmpUser1:x:1009:1012::/home/tmpUser1:/bin/bash
+tmpUser2:x:1010:1013::/home/tmpUser2:/bin/bash
+
+
+
+Просмотр информации о группах:
+nano /etc/group
+tmpUser1:x:1012:
+tmpUser2:x:1013:
+
+абота №1 Управление правами доступа к объектам ОС Linux
+Цель: Изучить команды ОС и принципы разграничения доступа к файловой системе
+
+Просмотр информации о пользователях:
+nano /etc/passwd
+
+tmpUser1:x:1009:1012::/home/tmpUser1:/bin/bash
+tmpUser2:x:1010:1013::/home/tmpUser2:/bin/bash
+
+
+Просмотр информации о группах:
+nano /etc/group
+tmpUser1:x:1012:
+tmpUser2:x:1013:
+
+Просмотр теневых паролей:
+sudo nano /etc/shadow
+tmpUser1:!:20035:0:99999:7:::
+tmpUser2:!:20035:0:99999:7:::
+
+Просмотр информации о паролях групп:
+sudo nano /etc/gshadow
+tmpUser1:!::
+tmpUser2:!::
+
+Создание нового пароля для пользователя tmpUser1
+sudo passwd tmpUser1
+Создание нового пароля для пользователя tmpUser2
+sudo passwd tmpUser2
+
+Переключение на другого пользователя:
+su tmpUser1
+su tmpUser2
+
+Смена группы пользователя:
+newgrp <имя группы>
+newgrp tempgrp
+
+Выход из текущей группы
+exit
+
+При переключении в новую группу объекты, создание которых разрешено
+пользователям, создаются от имени пользователя и от имени группы.
+-rw-rw-r-- 1 tmpUser1 tmpUser1  0 ноя 8 14:35 f3
+-rw-rw-r-- 1 tmpUser1 tempgrp  0 ноя 8 14:35 f4
+
+
+Создание объектов администратором и изменение прав доступа
+к объектам и владельцам объектов
+
+1. Создание папки администратором
+sudo mkdir <полное имя папки>
+  Файл: ./
+  Размер: 4096          Блоков: 8          Блок В/В: 4096   каталог
+Устройство: 803h/2051d  Инода: 938936      Ссылки: 2
+Доступ: (0755/drwxr-xr-x)  Uid: (    0/    root)   Gid: (    0/    root)
+Доступ:        2024-11-08 15:11:41.077329428 +0700
+Модифицирован: 2024-11-08 15:11:41.077329428 +0700
+Изменён:       2024-11-08 15:11:41.077329428 +0700
+Создан:        2024-11-08 15:11:41.077329428 +0700
+
+2. Изменение владельца папки temp
+sudo chown tmpUser1:tempgrp /home/temp/
+  Файл: ./
+  Размер: 4096          Блоков: 8          Блок В/В: 4096   каталог
+Устройство: 803h/2051d  Инода: 938936      Ссылки: 2
+Доступ: (0755/drwxr-xr-x)  Uid: ( 1009/tmpUser1)   Gid: ( 1011/ tempgrp)
+Доступ:        2024-11-08 15:11:41.077329428 +0700
+Модифицирован: 2024-11-08 15:11:41.077329428 +0700
+Изменён:       2024-11-08 15:50:09.293147729 +0700
+Создан:        2024-11-08 15:11:41.077329428 +0700
+
+3. Изменение прав доступа к папке temp:
+sudo chmod ugo+w /home/temp/ права на запись
+
+student@alexander - VirtualBox: /home/temp$ sudo chmod ug+w /home/temp
+Добавили право на запись для владельцев и группы
+
+Проверка прав доступа:
+stat ./ 
+  Файл ./
+  Размер: 4096		Блоков:8	Блок В/В:4096   каталог
+Устройство: 803h/2051d  Инода: 974853	Ссылки: 2
+Доступ: (0777/drwrwxrwx) Uid: ( 1008/ temp11) Gid: ( 1004/ temprp)
+
+student@alexander - VirtualBox: /home/temp$ su temp11
+Пароль:
+temp11@alexander - VirtualBox: /home/temp$ touch f1
+temp11@alexander - VirtualBox: /home/temp$ touch f2
+temp11@alexander - VirtualBox: /home/temp$ mkdir F
+
+temp11@alexander - VirtualBox: /home/temp$ ls -l
+итого 4
+drwxrwxr -x 2 temp11 temp11 4096 ноя 8 15:59 F
+drwxrwxr -x 1 temp11 temp11    0 ноя 8 15:59 f1
+drwxrwxr -x 1 temp11 temp11    0 ноя 8 15:59 f2
+
+temp11@alexander - VirtualBox: /home/temp$ exit
+exit
+student@alexander - VirtualBox: /home/temp$ su temp12
+Пароль:
+temp12@alexander - VirtualBox: /home/temp$ touch f4
+touch: невозможно выполнить touch для 'f4': Отказано в доступе
+
+temp12@alexander - VirtualBox: home/temp$ newgrp temgrp
+Пароль:
+temp12@alexander - VirtualBox: home/temp$ touch f5
+temp12@alexander - VirtualBox: home/temp$ cat > f5
+dfh
+temp12@alexander - VirtualBox: home/temp$ cat f5
+dfh
+
+Специальные биты доступа к файлам и папкам (устанавливает администратор)
+1. SUID - позволяет запускать программу от имени владельца
+sudo chmod u+s <имя файла>
+2. GUID - устанавливает правила запуска от группы для файла и устанавливает правила наследования группы для папок
+3. Sticky bit - устанавливает запрещение на удаление объектов в папке 
+sudo chmod o+t <имя папки>
+
+
